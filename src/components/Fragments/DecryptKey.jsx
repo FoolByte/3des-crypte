@@ -5,13 +5,15 @@ import { Button } from '@/components/ui/button';
 
 export default function DecryptKey({ keyValue, setKey, handleDecrypt, selectedFile, isDecrypting, error }) {
   return (
-    <CardBase title="Password">
+    <CardBase
+      title="Password"
+      description={'key yang sama saat enkripsi'}
+    >
       <div className="flex items-center gap-5">
         <Input
           type="password"
           value={keyValue}
           onChange={(e) => setKey(e.target.value)}
-          placeholder="key yang sama saat enkripsi"
           className="text-xs"
           aria-label="Key Dekripsi"
         />

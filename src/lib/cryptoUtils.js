@@ -68,8 +68,7 @@ export const decryptFile = async (file, key) => {
           blob,
         });
       } catch (error) {
-        console.error(error);
-        reject(new Error('Password tidak cocok'));
+        reject(new Error('Key tidak cocok atau file tidak valid ' + error.message));
       }
     };
 

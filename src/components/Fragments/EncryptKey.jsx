@@ -5,7 +5,10 @@ import { Lock, Loader2, AlertCircle } from 'lucide-react';
 
 export default function EncryptKey({ keyValue, setKey, handleEncrypt, selectedFile, isEncrypting, error, setError }) {
   return (
-    <CardBase title="Password (sebagai key)">
+    <CardBase
+      title="Password"
+      description="Password akan digunakan sebagai key"
+    >
       <div className="flex items-center gap-5">
         <Input
           type="text"
@@ -24,7 +27,6 @@ export default function EncryptKey({ keyValue, setKey, handleEncrypt, selectedFi
         />
 
         <Button
-          variant="secondary"
           onClick={handleEncrypt}
           disabled={!selectedFile || !keyValue.trim() || isEncrypting}
           className="text-xs"

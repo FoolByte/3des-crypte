@@ -14,10 +14,10 @@ export default function DialogDownload({ showDialog, setShowDialog, handleDownlo
           <DialogTitle> Enkripsi Berhasil!</DialogTitle>
           <DialogDescription>Silakan unduh file hasil enkripsi Anda.</DialogDescription>
         </DialogHeader>
-        <div className="space-y-4">
-          <div className="flex items-end gap-5">
-            <Paperclip className="h-5 w-5 text-gray-500" />
-            <TypoP>{`${fileName}.enc`}</TypoP>
+        <div className="flex items-center justify-center gap-2">
+          <Paperclip className="h-5 w-5" />
+          <div className="overflow-x-auto">
+            <p className="text-sm w-55 whitespace-nowrap">{`${fileName}.enc`}</p>
           </div>
         </div>
         <div className="flex gap-3">
@@ -26,7 +26,6 @@ export default function DialogDownload({ showDialog, setShowDialog, handleDownlo
               handleDownload();
               setShowDialog(false);
             }}
-            variant="outline"
           >
             <Download className="h-5 w-5" />
             Download File .enc
@@ -39,6 +38,7 @@ export default function DialogDownload({ showDialog, setShowDialog, handleDownlo
                 setShowDialog(false);
               }}
               className="flex-1"
+              variant="outline"
             >
               Reset
             </Button>
