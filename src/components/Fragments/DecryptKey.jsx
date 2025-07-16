@@ -7,32 +7,33 @@ export default function DecryptKey({ keyValue, setKey, handleDecrypt, selectedFi
   return (
     <CardBase
       title="Password"
-      description={'key yang sama saat enkripsi'}
+      description="Password sebagai key untuk dekripsi"
     >
-      <div className="flex items-center gap-5">
+      <div className="min-h-15 mb-1">
         <Input
-          type="password"
+          type="text"
           value={keyValue}
           onChange={(e) => setKey(e.target.value)}
           className="text-xs"
           aria-label="Key Dekripsi"
+          placeholder="key yang sama saat enkripsi"
         />
-        <Button
-          variant="secondary"
-          onClick={handleDecrypt}
-          disabled={!selectedFile || !keyValue.trim() || isDecrypting}
-          className="text-xs"
-        >
-          {isDecrypting ? <Loader2 className="animate-spin h-5 w-5" /> : <Unlock className="h-5 w-5" />}
-          Dekripsi
-        </Button>
+        {error && (
+          <span className="text-yellow-500 dark:text-yellow-500 text-[11px] flex text-red mt-1">
+            <AlertCircle className="h-4" />
+            {error}
+          </span>
+        )}
       </div>
-      {error && (
-        <div className="flex items-center gap-1 mt-3">
-          <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-500" />
-          <span className="text-red-700 dark:text-red-500 text-sm">{error}</span>
-        </div>
-      )}
+
+      <Button
+        onClick={handleDecrypt}
+        disabled={!selectedFile || !keyValue.trim() || isDecrypting}
+        className="text-xs w-full"
+      >
+        {isDecrypting ? <Loader2 className="animate-spin h-5 w-5" /> : <Unlock className="h-5 w-5" />}
+        Dekripsi
+      </Button>
     </CardBase>
   );
 }

@@ -4,10 +4,7 @@ import { useFileUpload } from '@/hooks/use-file-upload';
 import { Button } from '@/components/ui/button';
 import { useEffect } from 'react';
 
-export default function ImageUploader({ onFileChange, resetTrigger }) {
-  const maxSizeMB = 2;
-  const maxSize = maxSizeMB * 1024 * 1024; // 2MB default
-
+export default function ImageUploader({ onFileChange, resetTrigger, maxSize }) {
   const [{ files, isDragging, errors }, { handleDragEnter, handleDragLeave, handleDragOver, handleDrop, openFileDialog, removeFile, getInputProps, clearFiles }] = useFileUpload({
     accept: 'image/svg+xml,image/png,image/jpeg,image/jpg,image/gif',
     maxSize,
@@ -37,7 +34,7 @@ export default function ImageUploader({ onFileChange, resetTrigger }) {
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           data-dragging={isDragging || undefined}
-          className="border-input data-[dragging=true]:bg-accent/50 has-[input:focus]:border-ring has-[input:focus]:ring-ring/50 relative flex min-h-52 flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed p-4 transition-colors has-[input:focus]:ring-[3px]"
+          className="border-input data-[dragging=true]:bg-accent/50 has-[input:focus]:border-ring has-[input:focus]:ring-ring/50 relative flex min-h-52 flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed  transition-colors has-[input:focus]:ring-[3px]"
         >
           <input
             {...getInputProps()}
@@ -61,8 +58,7 @@ export default function ImageUploader({ onFileChange, resetTrigger }) {
               >
                 <ImageIcon className="size-4 opacity-60" />
               </div>
-              <p className="mb-1.5 text-sm font-medium">Unggah gambar Anda di sin</p>
-              <p className="text-muted-foreground text-xs">Pilih Gambar (JPG/PNG,max. {maxSizeMB}MB)</p>
+              <p className="text-sm font-medium">Unggah gambar Anda di sin</p>
               <Button
                 variant="outline"
                 className="mt-4"

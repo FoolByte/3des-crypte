@@ -83,11 +83,23 @@ export default function Decrypt() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 md:px-20">
       <div className="text-center">
         <TypographyH3>Dekripsi Gambar</TypographyH3>
         <TypoP>Kembalikan gambar terenkripsi ke bentuk aslinya</TypoP>
       </div>
+
+      {/* Key Input */}
+      {selectedFile && (
+        <DecryptKey
+          keyValue={key}
+          setKey={setKey}
+          handleDecrypt={handleDecrypt}
+          selectedFile={selectedFile}
+          isDecrypting={isDecrypting}
+          error={error}
+        />
+      )}
 
       {/* File Upload */}
       <CardBase title="Pilih File Hasil Enkripsi (.enc)">
@@ -97,16 +109,6 @@ export default function Decrypt() {
           accept=".enc"
         />
       </CardBase>
-
-      {/* Key Input */}
-      <DecryptKey
-        keyValue={key}
-        setKey={setKey}
-        handleDecrypt={handleDecrypt}
-        selectedFile={selectedFile}
-        isDecrypting={isDecrypting}
-        error={error}
-      />
 
       <DialogDecrypt
         showDialog={isDialogOpen}

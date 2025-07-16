@@ -4,12 +4,13 @@ import CardBase from './CardBase';
 import { Lock, Loader2, AlertCircle } from 'lucide-react';
 
 export default function EncryptKey({ keyValue, setKey, handleEncrypt, selectedFile, isEncrypting, error, setError }) {
+  const isPasswordValid = (password) => password.length >= 6;
   return (
     <CardBase
       title="Password"
       description="Password akan digunakan sebagai key"
     >
-      <div className="flex items-center gap-5">
+      <div className="min-h-15 mb-1">
         <Input
           type="text"
           value={keyValue}
@@ -26,21 +27,22 @@ export default function EncryptKey({ keyValue, setKey, handleEncrypt, selectedFi
           className="text-xs"
         />
 
-        <Button
-          onClick={handleEncrypt}
-          disabled={!selectedFile || !keyValue.trim() || isEncrypting}
-          className="text-xs"
-        >
-          {isEncrypting ? <Loader2 className="animate-spin h-5 w-5" /> : <Lock className="h-5 w-5" />}
-          Enkripsi
-        </Button>
+        {error && (
+          <span className="text-yellow-500 dark:text-yellow-500 text-[11px] flex text-red mt-1">
+            <AlertCircle className="h-4" />
+            {error}
+          </span>
+        )}
       </div>
-      {error && (
-        <div className="flex items-center gap-1 mt-3">
-          <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-500" />
-          <span className="text-yellow-700 dark:text-yellow-500 text-sm">{error}</span>
-        </div>
-      )}
+
+      <Button
+        onClick={handleEncrypt}
+        disabled={!selectedFile || !isPasswordValid(keyValue.trim()) || isEncrypting}
+        className="text-xs w-full"
+      >
+        {isEncrypting ? <Loader2 className="animate-spin h-5 w-5" /> : <Lock className="h-5 w-5" />}
+        Enkripsi
+      </Button>
     </CardBase>
   );
 }

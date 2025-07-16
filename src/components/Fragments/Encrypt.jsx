@@ -7,6 +7,7 @@ import CardBase from './CardBase';
 
 import DialogDownload from './DialogDownload';
 import EncryptKey from './EncryptKey';
+import DialogEncryptKey from './DialogEncrytpKey';
 
 const Encrypt = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -17,14 +18,18 @@ const Encrypt = () => {
   const [error, setError] = useState('');
   const [showDialog, setShowDialog] = useState(false);
   const [resetUploader, setResetUploader] = useState(0);
+  // const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const maxSizeMB = 2;
+  const maxSize = maxSizeMB * 1024 * 1024; // 2MB default
 
   const handleEncrypt = async () => {
     if (key.length < 6) {
-      setError(`Key minimal 6 karakter. Anda masih perlu mengetikkan ${6 - key.length} huruf lagi.`);
+      setError(`Key minimal 6 karakter. Anda perlu mengetikkan ${6 - key.length} karakter lagi.`);
       return;
     }
 
     setIsEncrypting(true);
+    // setShowPasswordDialog((prev) => !prev);
     setError('');
 
     try {
@@ -65,33 +70,36 @@ const Encrypt = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 md:px-20">
       <div className="text-center">
         <TypographyH3>Enkripsi Gambar</TypographyH3>
         <TypoP>Amankan gambar Anda dengan enkripsi Triple DES</TypoP>
       </div>
 
+      {/* Input Password Enkripsi */}
+      {selectedFile && (
+        <EncryptKey
+          keyValue={key}
+          setKey={setKey}
+          handleEncrypt={handleEncrypt}
+          selectedFile={selectedFile}
+          isEncrypting={isEncrypting}
+          error={error}
+          setError={setError}
+        />
+      )}
+
       {/* Image Upload */}
-      <CardBase title="Pilih Gambar">
+      <CardBase title={`Pilih Gambar (JPG/PNG, max. ${maxSizeMB}MB)`}>
         <ImageUploader
           onFileChange={(file) => {
             setSelectedFile(file);
             setFileName(file ? file.name.replace(/\[.*?\]/g, '').split('.')[0] + ' [encrypted]' : '');
           }}
           resetTrigger={resetUploader}
+          maxSize={maxSize} // Atur ukuran maksimum file
         />
       </CardBase>
-
-      {/* Input Password Enkripsi */}
-      <EncryptKey
-        keyValue={key}
-        setKey={setKey}
-        handleEncrypt={handleEncrypt}
-        selectedFile={selectedFile}
-        isEncrypting={isEncrypting}
-        error={error}
-        setError={setError}
-      />
 
       {/* Dialog box download file .enc */}
       <DialogDownload

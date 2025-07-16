@@ -1,6 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { Download, Paperclip } from 'lucide-react';
-import TypoP from '../Typography/TypoP';
 import { Button } from '@/components/ui/button';
 
 export default function DialogDownload({ showDialog, setShowDialog, handleDownload, fileName, resetForm }) {
@@ -14,7 +13,7 @@ export default function DialogDownload({ showDialog, setShowDialog, handleDownlo
           <DialogTitle> Enkripsi Berhasil!</DialogTitle>
           <DialogDescription>Silakan unduh file hasil enkripsi Anda.</DialogDescription>
         </DialogHeader>
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center gap-2">
           <Paperclip className="h-5 w-5" />
           <div className="overflow-x-auto">
             <p className="text-sm w-55 whitespace-nowrap">{`${fileName}.enc`}</p>
