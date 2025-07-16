@@ -30,22 +30,23 @@ export default function DialogDecrypt({ showDialog, setShowDialog, decryptedResu
         )}
 
         <div className="flex flex-col gap-3">
-          <Button
-            onClick={() => {
-              handleDownloadImage();
-              setShowDialog(false);
-            }}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Download Gambar Asli
-          </Button>
+          <DialogClose asChild>
+            <Button
+              onClick={() => {
+                handleDownloadImage();
+                resetForm();
+              }}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Download Gambar Asli
+            </Button>
+          </DialogClose>
           <DialogClose asChild>
             <Button
               onClick={() => {
                 resetForm();
-                setShowDialog(false);
               }}
               className="flex-1"
             >

@@ -1,35 +1,44 @@
 import CryptoJS from 'crypto-js';
 
 // Encrypt image file and create scrambled pixel image
-export const encryptImage = async (file, key) => {
+export const encryptImage = async (file, key, customText = '') => {
+  const reader = new FileReader();
+
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
+    reader.onload = async function (e) {
+      const base64Data = e.target.result.split(',')[1];
 
-    reader.onload = function (e) {
-      try {
-        const base64Data = e.target.result.split(',')[1]; // Remove data:image/...;base64, prefix
+      const worker = new Worker('/encryptWorker.js');
 
-        // Encrypt using Triple DES with CBC mode
-        const encrypted = CryptoJS.TripleDES.encrypt(base64Data, key, {
-          mode: CryptoJS.mode.CBC,
-          padding: CryptoJS.pad.Pkcs7,
-        });
+      worker.postMessage({
+        base64Data,
+        mimeType: file.type,
+        key,
+        customText,
+      });
 
-        // Convert encrypted data to scrambled image
-        const encryptedString = encrypted.toString();
-        createScrambledImage(encryptedString, file.type)
-          .then((result) => {
+      worker.onmessage = async (event) => {
+        const { status, encryptedData, message } = event.data;
+
+        if (status === 'error') {
+          reject(new Error(message));
+        } else {
+          try {
+            const result = await createScrambledImage(encryptedData, file.type, customText);
             resolve({
               blob: result.blob,
-              originalDataUrl: e.target.result, // Original image for preview
+              scrambledDataUrl: result.dataUrl,
+              originalDataUrl: e.target.result,
               mimeType: file.type,
-              scrambledDataUrl: result.dataUrl, // Scrambled image data URL
+              customText,
             });
-          })
-          .catch(reject);
-      } catch (error) {
-        reject(new Error('Enkripsi gagal: ' + error.message));
-      }
+          } catch (err) {
+            reject(new Error('Gagal membuat gambar terenkripsi: ' + err.message));
+          }
+        }
+      };
+
+      worker.onerror = () => reject(new Error('Gagal menjalankan worker'));
     };
 
     reader.onerror = () => reject(new Error('Gagal membaca file'));
@@ -37,53 +46,59 @@ export const encryptImage = async (file, key) => {
   });
 };
 
-// Decrypt scrambled image back to original image
+/**
+ * Mendekripsi file gambar terenkripsi (yang telah diacak) menggunakan Web Worker.
+ *
+ * Proses mencakup:
+ *  - Membaca file sebagai ArrayBuffer
+ *  - Mengirim ke Web Worker untuk mengekstrak data terenkripsi
+ *  - Mendekripsi dengan Triple DES
+ *  - Mengembalikan blob dan data URL dari hasil dekripsi
+ *
+ * @param {File} file - File hasil enkripsi (scrambled image)
+ * @param {string} key - Kata sandi untuk mendekripsi
+ * @returns {Promise<{ imageDataUrl: string, blob: Blob }>}
+ */
 export const decryptImage = async (file, key) => {
+  const reader = new FileReader();
+
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
     reader.onload = function (e) {
-      try {
-        // Extract encrypted data from scrambled image
-        const imageData = new Uint8Array(e.target.result);
-        const encryptedData = extractDataFromImage(imageData);
+      const buffer = e.target.result;
 
-        if (!encryptedData) {
-          throw new Error('File gambar tidak valid atau bukan hasil enkripsi');
+      const worker = new Worker('/decryptWorker.js');
+
+      worker.postMessage({ buffer, key });
+
+      worker.onmessage = (event) => {
+        const { status, decryptedBase64, message } = event.data;
+
+        if (status === 'error') {
+          console.error('Decrypt error:', message);
+          reject(new Error('Password tidak valid'));
+        } else {
+          try {
+            const byteCharacters = atob(decryptedBase64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'image/png' });
+            const imageDataUrl = `data:image/png;base64,${decryptedBase64}`;
+
+            resolve({
+              imageDataUrl,
+              blob,
+            });
+          } catch (error) {
+            console.error('Error during decryption:', error);
+            reject(new Error('Gagal membentuk gambar hasil dekripsi'));
+          }
         }
+      };
 
-        // Decrypt using Triple DES
-        const decrypted = CryptoJS.TripleDES.decrypt(encryptedData, key, {
-          mode: CryptoJS.mode.CBC,
-          padding: CryptoJS.pad.Pkcs7,
-        });
-
-        const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
-
-        if (!decryptedString) {
-          throw new Error('Key tidak cocok atau file tidak valid');
-        }
-
-        // Convert back to image data URL
-        const imageDataUrl = `data:image/png;base64,${decryptedString}`;
-
-        // Create blob for download
-        const byteCharacters = atob(decryptedString);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'image/png' });
-
-        resolve({
-          imageDataUrl,
-          blob,
-        });
-      } catch (error) {
-        console.error('Decrypt error:', error);
-        reject(new Error('Key tidak cocok atau file tidak valid'));
-      }
+      worker.onerror = () => reject(new Error('Worker dekripsi gagal'));
     };
 
     reader.onerror = () => reject(new Error('Gagal membaca file'));
@@ -92,15 +107,18 @@ export const decryptImage = async (file, key) => {
 };
 
 // Create scrambled image from encrypted data
-const createScrambledImage = (encryptedData, originalMimeType = 'image/jpeg') => {
+const createScrambledImage = (encryptedData, originalMimeType = 'image/jpeg', customText = '') => {
   return new Promise((resolve) => {
     // Create canvas for image generation
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
-    // Calculate image dimensions (square image)
+    // Calculate image dimensions (minimum 400x400 for better text visibility)
     const dataLength = encryptedData.length;
-    const dimension = Math.ceil(Math.sqrt(dataLength / 3)); // 3 bytes per pixel (RGB)
+    const minDimension = 400;
+    const calculatedDimension = Math.ceil(Math.sqrt(dataLength / 3)); // 3 bytes per pixel (RGB)
+    const dimension = Math.max(minDimension, calculatedDimension);
+
     canvas.width = dimension;
     canvas.height = dimension;
 
@@ -128,6 +146,39 @@ const createScrambledImage = (encryptedData, originalMimeType = 'image/jpeg') =>
 
     // Put image data on canvas
     ctx.putImageData(imageData, 0, 0);
+
+    // Add custom text overlay if provided
+    if (customText.trim()) {
+      // Create semi-transparent overlay for better text visibility
+      const overlayCanvas = document.createElement('canvas');
+      const overlayCtx = overlayCanvas.getContext('2d');
+      overlayCanvas.width = dimension;
+      overlayCanvas.height = dimension;
+
+      // Draw semi-transparent background
+      overlayCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      overlayCtx.fillRect(0, 0, dimension, dimension);
+
+      // Setup text styling
+      const fontSize = Math.max(24, dimension / 15);
+      overlayCtx.font = `bold ${fontSize}px Arial, sans-serif`;
+      overlayCtx.fillStyle = '#ffffff';
+      overlayCtx.strokeStyle = '#000000';
+      overlayCtx.lineWidth = 2;
+      overlayCtx.textAlign = 'center';
+      overlayCtx.textBaseline = 'middle';
+
+      // Draw text with stroke for better visibility
+      const centerX = dimension / 2;
+      const centerY = dimension / 2;
+
+      overlayCtx.strokeText(customText, centerX, centerY);
+      overlayCtx.fillText(customText, centerX, centerY);
+
+      // Blend overlay with scrambled image
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(overlayCanvas, 0, 0);
+    }
 
     // Get scrambled image data URL for preview
     const scrambledDataUrl = canvas.toDataURL('image/jpeg', 0.9);

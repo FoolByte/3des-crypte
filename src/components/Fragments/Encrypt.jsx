@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { encryptImage, getFileExtension } from '../../lib/cryptoUtils';
 import { TypographyH3 } from '../Typography/TypographyH3';
 import TypoP from '../Typography/TypoP';
@@ -6,7 +6,6 @@ import ImageUploader from '../comp-545';
 import CardBase from './CardBase';
 import DialogDownload from './DialogDownload';
 import EncryptKey from './EncryptKey';
-import DialogEncryptKey from './DialogEncrytpKey';
 
 const Encrypt = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -17,7 +16,7 @@ const Encrypt = () => {
   const [error, setError] = useState('');
   const [showDialog, setShowDialog] = useState(false);
   const [resetUploader, setResetUploader] = useState(0);
-  // const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [customText, setCustomText] = useState('');
 
   const maxSizeMB = 5;
   const maxSize = maxSizeMB * 1024 * 1024; // 2MB default
@@ -29,13 +28,11 @@ const Encrypt = () => {
     }
 
     setIsEncrypting(true);
-    // setShowPasswordDialog((prev) => !prev);
     setError('');
 
     try {
-      // await new Promise((resolve) => setTimeout(resolve, 100));
-      console.log('Mulai enkripsi:', selectedFile, key);
-      const encrypted = await encryptImage(selectedFile, key);
+      console.log('Mulai enkripsi:', selectedFile, key, customText);
+      const encrypted = await encryptImage(selectedFile, key, customText);
       console.log('Hasil encrypted:', encrypted);
       setEncryptedResult(encrypted);
       setShowDialog(true);
@@ -43,7 +40,7 @@ const Encrypt = () => {
       setError(error.message || 'Terjadi kesalahan saat enkripsi');
       console.error('Encrypt error:', error);
     } finally {
-      setIsEncrypting(false);
+      setIsEncrypting(false); // Matikan spinner
     }
   };
 
@@ -67,11 +64,19 @@ const Encrypt = () => {
   const resetForm = () => {
     setSelectedFile(null);
     setKey('');
+    setCustomText('');
     setEncryptedResult(null);
     setFileName('');
     setError('');
     setResetUploader((prev) => prev + 1);
   };
+
+  useEffect(() => {
+    if (selectedFile) {
+      const input = document.querySelector('input[type="text"]');
+      input && input.focus();
+    }
+  }, [selectedFile]);
 
   return (
     <div className="space-y-6 md:px-20">
@@ -90,6 +95,8 @@ const Encrypt = () => {
           isEncrypting={isEncrypting}
           error={error}
           setError={setError}
+          customText={customText}
+          setCustomText={setCustomText}
         />
       )}
 

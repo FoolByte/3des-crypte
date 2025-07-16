@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { decryptImage } from '../../lib/cryptoUtils';
 import { TypographyH3 } from '../Typography/TypographyH3';
 import TypoP from '../Typography/TypoP';
@@ -21,16 +21,6 @@ const Decrypt = () => {
   const maxSize = maxSizeMB * 1024 * 1024; // 5MB default
 
   const handleDecrypt = async () => {
-    if (!selectedFile) {
-      setError('Pilih file gambar terlebih dahulu');
-      return;
-    }
-
-    if (key.length < 6) {
-      setError(`Key minimal 6 karakter. Anda perlu mengetikkan ${6 - key.length} karakter lagi.`);
-      return;
-    }
-
     setIsDecrypting(true);
     setError('');
 
@@ -74,6 +64,13 @@ const Decrypt = () => {
     setResetUploader((prev) => prev + 1);
   };
 
+  useEffect(() => {
+    if (selectedFile) {
+      const input = document.querySelector('input[type="text"]');
+      input && input.focus();
+    }
+  }, [selectedFile]);
+
   return (
     <div className="space-y-6 md:px-20">
       <div className="text-center">
@@ -102,7 +99,6 @@ const Decrypt = () => {
           onFileChange={(file) => {
             setSelectedFile(file);
             setFileName(file ? file.name.replace(/\[.*?\]/g, '').split('.')[0] : '');
-            setError(''); // Clear error when new file is selected
           }}
           resetTrigger={resetUploader}
           maxSize={maxSize}

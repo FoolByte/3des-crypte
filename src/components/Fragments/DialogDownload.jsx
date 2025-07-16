@@ -35,7 +35,7 @@ export default function DialogDownload({ showDialog, setShowDialog, handleDownlo
 
             {/* Image Preview */}
             <div className="flex flex-col items-center space-y-2">
-              <div className="text-sm font-medium text-gray-600">{showOriginal ? 'Gambar Asli:' : 'Hasil Enkripsi (Pixel Acak):'}</div>
+              {showOriginal ? <DialogDescription>Gambar Asli:</DialogDescription> : <DialogDescription>Hasil Enkripsi (Pixel Acak):</DialogDescription>}{' '}
               <div className="border rounded-lg overflow-hidden">
                 <img
                   src={showOriginal ? encryptedResult.originalDataUrl : encryptedResult.scrambledDataUrl}
@@ -48,22 +48,24 @@ export default function DialogDownload({ showDialog, setShowDialog, handleDownlo
         )}
 
         <div className="flex flex-col gap-3">
-          <Button
-            onClick={() => {
-              handleDownload();
-              setShowDialog(false);
-            }}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Download Gambar Terenkripsi
-          </Button>
+          <DialogClose asChild>
+            <Button
+              onClick={() => {
+                handleDownload();
+                resetForm();
+              }}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Download Gambar Terenkripsi
+            </Button>
+          </DialogClose>
+
           <DialogClose asChild>
             <Button
               onClick={() => {
                 resetForm();
-                setShowDialog(false);
               }}
               className="flex-1"
             >
