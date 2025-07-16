@@ -16,7 +16,7 @@ function App() {
         {/* Main content with animation */}
         <div className="flex flex-col justify-center items-center mb-5 relative mt-5">
           {/* Lottie di belakang teks */}
-          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-24 h-24 opacity-80 pointer-events-none z-0">
+          <div className="lottie-wrapper absolute -top-10 left-1/2 -translate-x-1/2 w-24 h-24 opacity-80 pointer-events-none z-0">
             <Lottie
               animationData={imgAnimate}
               loop={true}

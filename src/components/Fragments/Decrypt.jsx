@@ -1,73 +1,64 @@
 import { useState } from 'react';
-import { decryptFile } from '../../lib/cryptoUtils';
-import CardBase from './CardBase';
+import { decryptImage } from '../../lib/cryptoUtils';
 import { TypographyH3 } from '../Typography/TypographyH3';
 import TypoP from '../Typography/TypoP';
-import FileUploader from '../comp-548';
-import DecryptKey from './DecryptKey';
+import ImageUploader from '../comp-545';
+import CardBase from './CardBase';
 import DialogDecrypt from './DialogDecrypt';
+import DecryptKey from './DecryptKey';
 
-export default function Decrypt() {
+const Decrypt = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [key, setKey] = useState('');
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [decryptedResult, setDecryptedResult] = useState(null);
+  const [fileName, setFileName] = useState('');
   const [error, setError] = useState('');
+  const [showDialog, setShowDialog] = useState(false);
   const [resetUploader, setResetUploader] = useState(0);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleFileChange = (file) => {
-    if (!file) {
-      setSelectedFile(null);
-      return;
-    }
-    if (!file.name.toLowerCase().endsWith('.enc')) {
-      setError('Hanya file .enc yang diizinkan');
-      setSelectedFile(null);
-      return;
-    }
-    setSelectedFile(file);
-  };
+  const maxSizeMB = 5;
+  const maxSize = maxSizeMB * 1024 * 1024; // 5MB default
 
   const handleDecrypt = async () => {
-    if (!selectedFile || !key.trim()) {
-      setError('Pilih file .enc dan masukkan key terlebih dahulu');
+    if (!selectedFile) {
+      setError('Pilih file gambar terlebih dahulu');
+      return;
+    }
+
+    if (key.length < 6) {
+      setError(`Key minimal 6 karakter. Anda perlu mengetikkan ${6 - key.length} karakter lagi.`);
       return;
     }
 
     setIsDecrypting(true);
     setError('');
-    setDecryptedResult(null);
 
     try {
-      const result = await decryptFile(selectedFile, key);
-      setDecryptedResult(result);
-      setIsDialogOpen(true);
+      console.log('Mulai dekripsi:', selectedFile, key);
+      const decrypted = await decryptImage(selectedFile, key);
+      console.log('Hasil dekripsi:', decrypted);
+      setDecryptedResult(decrypted);
+      setShowDialog(true);
     } catch (error) {
-      setError(error.message);
+      setError(error.message || 'Terjadi kesalahan saat dekripsi');
+      console.error('Decrypt error:', error);
     } finally {
       setIsDecrypting(false);
     }
   };
 
-  const handleDownloadImage = (result = decryptedResult) => {
-    if (!result) return;
+  const handleDownloadImage = () => {
+    if (!decryptedResult) return;
 
-    const url = URL.createObjectURL(result.blob);
+    const url = URL.createObjectURL(decryptedResult.blob);
     const a = document.createElement('a');
-    let downloadName = 'decrypted [decrypt].png';
-
-    if (selectedFile) {
-      downloadName =
-        selectedFile.name
-          .replace(/\[.*?\]/g, '')
-          .replace('.enc', '')
-          .trim() + ' [decrypt].png';
-    }
-    setIsDialogOpen(false);
-
     a.href = url;
-    a.download = downloadName;
+
+    // Determine file extension - default to png since decrypted images are usually png
+    const extension = 'png';
+    a.download = `${fileName}_decrypted.${extension}`;
+
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -78,6 +69,7 @@ export default function Decrypt() {
     setSelectedFile(null);
     setKey('');
     setDecryptedResult(null);
+    setFileName('');
     setError('');
     setResetUploader((prev) => prev + 1);
   };
@@ -86,10 +78,10 @@ export default function Decrypt() {
     <div className="space-y-6 md:px-20">
       <div className="text-center">
         <TypographyH3>Dekripsi Gambar</TypographyH3>
-        <TypoP>Kembalikan gambar terenkripsi ke bentuk aslinya</TypoP>
+        <TypoP>Pulihkan gambar terenkripsi dengan Triple DES</TypoP>
       </div>
 
-      {/* Key Input */}
+      {/* Input Password Dekripsi */}
       {selectedFile && (
         <DecryptKey
           keyValue={key}
@@ -101,22 +93,32 @@ export default function Decrypt() {
         />
       )}
 
-      {/* File Upload */}
-      <CardBase title="Pilih File Hasil Enkripsi (.enc)">
-        <FileUploader
-          onFileChange={handleFileChange}
+      {/* Image Upload */}
+      <CardBase
+        title={`Pilih Gambar Terenkripsi`}
+        description={`(JPG/PNG, Max ${maxSizeMB} MB)`}
+      >
+        <ImageUploader
+          onFileChange={(file) => {
+            setSelectedFile(file);
+            setFileName(file ? file.name.replace(/\[.*?\]/g, '').split('.')[0] : '');
+            setError(''); // Clear error when new file is selected
+          }}
           resetTrigger={resetUploader}
-          accept=".enc"
+          maxSize={maxSize}
         />
       </CardBase>
 
+      {/* Dialog box download decrypted image */}
       <DialogDecrypt
-        showDialog={isDialogOpen}
-        setShowDialog={setIsDialogOpen}
-        decryptedResult={decryptedResult ? decryptedResult.imageDataUrl : null}
+        showDialog={showDialog}
+        setShowDialog={setShowDialog}
+        decryptedResult={decryptedResult}
         handleDownloadImage={handleDownloadImage}
         resetForm={resetForm}
       />
     </div>
   );
-}
+};
+
+export default Decrypt;

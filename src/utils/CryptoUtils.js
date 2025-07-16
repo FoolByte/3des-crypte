@@ -17,16 +17,9 @@ export const encryptImage = async (file, key) => {
 
         // Convert encrypted data to scrambled image
         const encryptedString = encrypted.toString();
-        createScrambledImage(encryptedString, file.type)
-          .then((result) => {
-            resolve({
-              blob: result.blob,
-              originalDataUrl: e.target.result, // Original image for preview
-              mimeType: file.type,
-              scrambledDataUrl: result.dataUrl, // Scrambled image data URL
-            });
-          })
-          .catch(reject);
+        const scrambledImageBlob = createScrambledImage(encryptedString);
+
+        resolve(scrambledImageBlob);
       } catch (error) {
         reject(new Error('Enkripsi gagal: ' + error.message));
       }
@@ -92,84 +85,74 @@ export const decryptImage = async (file, key) => {
 };
 
 // Create scrambled image from encrypted data
-const createScrambledImage = (encryptedData, originalMimeType = 'image/jpeg') => {
-  return new Promise((resolve) => {
-    // Create canvas for image generation
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+const createScrambledImage = (encryptedData) => {
+  // Create canvas for image generation
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
 
-    // Calculate image dimensions (square image)
-    const dataLength = encryptedData.length;
-    const dimension = Math.ceil(Math.sqrt(dataLength / 3)); // 3 bytes per pixel (RGB)
-    canvas.width = dimension;
-    canvas.height = dimension;
+  // Calculate image dimensions (square image)
+  const dataLength = encryptedData.length;
+  const dimension = Math.ceil(Math.sqrt(dataLength / 3)); // 3 bytes per pixel (RGB)
+  canvas.width = dimension;
+  canvas.height = dimension;
 
-    // Create image data
-    const imageData = ctx.createImageData(dimension, dimension);
-    const data = imageData.data;
+  // Create image data
+  const imageData = ctx.createImageData(dimension, dimension);
+  const data = imageData.data;
 
-    // Fill pixels with encrypted data
-    let dataIndex = 0;
-    for (let i = 0; i < data.length; i += 4) {
-      if (dataIndex < encryptedData.length) {
-        // Use encrypted data bytes as RGB values
-        data[i] = encryptedData.charCodeAt(dataIndex % encryptedData.length); // R
-        data[i + 1] = encryptedData.charCodeAt((dataIndex + 1) % encryptedData.length); // G
-        data[i + 2] = encryptedData.charCodeAt((dataIndex + 2) % encryptedData.length); // B
-        dataIndex += 3;
-      } else {
-        // Fill remaining pixels with pseudo-random values
-        data[i] = (i * 137) % 256; // R
-        data[i + 1] = (i * 211) % 256; // G
-        data[i + 2] = (i * 317) % 256; // B
-      }
-      data[i + 3] = 255; // Alpha (full opacity)
+  // Fill pixels with encrypted data
+  let dataIndex = 0;
+  for (let i = 0; i < data.length; i += 4) {
+    if (dataIndex < encryptedData.length) {
+      // Use encrypted data bytes as RGB values
+      data[i] = encryptedData.charCodeAt(dataIndex % encryptedData.length); // R
+      data[i + 1] = encryptedData.charCodeAt((dataIndex + 1) % encryptedData.length); // G
+      data[i + 2] = encryptedData.charCodeAt((dataIndex + 2) % encryptedData.length); // B
+      dataIndex += 3;
+    } else {
+      // Fill remaining pixels with pseudo-random values based on key
+      data[i] = (i * 137) % 256; // R
+      data[i + 1] = (i * 211) % 256; // G
+      data[i + 2] = (i * 317) % 256; // B
     }
+    data[i + 3] = 255; // Alpha (full opacity)
+  }
 
-    // Put image data on canvas
-    ctx.putImageData(imageData, 0, 0);
+  // Put image data on canvas
+  ctx.putImageData(imageData, 0, 0);
 
-    // Get scrambled image data URL for preview
-    const scrambledDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+  // Store encrypted data in canvas metadata (custom property)
+  canvas._encryptedData = encryptedData;
 
-    // Convert canvas to blob with proper format
-    const outputFormat = originalMimeType === 'image/jpeg' ? 'image/jpeg' : 'image/png';
-    const quality = outputFormat === 'image/jpeg' ? 0.9 : undefined;
+  // Convert canvas to blob
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => {
+      // Add encrypted data to blob metadata
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const arrayBuffer = e.target.result;
+        const uint8Array = new Uint8Array(arrayBuffer);
 
-    canvas.toBlob(
-      (blob) => {
-        // Add encrypted data to blob metadata
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const arrayBuffer = e.target.result;
-          const uint8Array = new Uint8Array(arrayBuffer);
+        // Append encrypted data as metadata at the end
+        const metadataMarker = new TextEncoder().encode('<<ENCRYPTED_DATA_START>>');
+        const encryptedBytes = new TextEncoder().encode(encryptedData);
+        const metadataEnd = new TextEncoder().encode('<<ENCRYPTED_DATA_END>>');
 
-          // Append encrypted data as metadata at the end
-          const metadataMarker = new TextEncoder().encode('<<ENCRYPTED_DATA_START>>');
-          const encryptedBytes = new TextEncoder().encode(encryptedData);
-          const metadataEnd = new TextEncoder().encode('<<ENCRYPTED_DATA_END>>');
+        const newSize = uint8Array.length + metadataMarker.length + encryptedBytes.length + metadataEnd.length;
+        const newArray = new Uint8Array(newSize);
 
-          const newSize = uint8Array.length + metadataMarker.length + encryptedBytes.length + metadataEnd.length;
-          const newArray = new Uint8Array(newSize);
+        // Copy original image data
+        newArray.set(uint8Array, 0);
+        // Append metadata
+        newArray.set(metadataMarker, uint8Array.length);
+        newArray.set(encryptedBytes, uint8Array.length + metadataMarker.length);
+        newArray.set(metadataEnd, uint8Array.length + metadataMarker.length + encryptedBytes.length);
 
-          // Copy original image data
-          newArray.set(uint8Array, 0);
-          // Append metadata
-          newArray.set(metadataMarker, uint8Array.length);
-          newArray.set(encryptedBytes, uint8Array.length + metadataMarker.length);
-          newArray.set(metadataEnd, uint8Array.length + metadataMarker.length + encryptedBytes.length);
-
-          const modifiedBlob = new Blob([newArray], { type: outputFormat });
-          resolve({
-            blob: modifiedBlob,
-            dataUrl: scrambledDataUrl,
-          });
-        };
-        reader.readAsArrayBuffer(blob);
-      },
-      outputFormat,
-      quality,
-    );
+        const modifiedBlob = new Blob([newArray], { type: 'image/png' });
+        resolve(modifiedBlob);
+      };
+      reader.readAsArrayBuffer(blob);
+    }, 'image/png');
   });
 };
 
@@ -195,16 +178,6 @@ const extractDataFromImage = (imageData) => {
     console.error('Error extracting data from image:', error);
     return null;
   }
-};
-
-// Get file extension from MIME type
-export const getFileExtension = (mimeType) => {
-  const extensions = {
-    'image/jpeg': 'jpg',
-    'image/jpg': 'jpg',
-    'image/png': 'png',
-  };
-  return extensions[mimeType] || 'jpg';
 };
 
 // Validate file size (max 5MB)
