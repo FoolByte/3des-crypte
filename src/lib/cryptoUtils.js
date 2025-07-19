@@ -111,72 +111,121 @@ const createScrambledImage = (encryptedData, originalMimeType = 'image/jpeg', cu
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
-    // Calculate image dimensions (minimum 400x400 for better text visibility)
-    const dataLength = encryptedData.length;
-    const minDimension = 400;
-    const calculatedDimension = Math.ceil(Math.sqrt(dataLength / 3)); // 3 bytes per pixel (RGB)
-    const dimension = Math.max(minDimension, calculatedDimension);
-
+    // Set fixed dimensions for consistent appearance
+    const dimension = 800;
     canvas.width = dimension;
     canvas.height = dimension;
 
-    // Create image data
-    const imageData = ctx.createImageData(dimension, dimension);
-    const data = imageData.data;
+    // Fill with black background
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, dimension, dimension);
 
-    // Fill pixels with encrypted data
-    let dataIndex = 0;
-    for (let i = 0; i < data.length; i += 4) {
-      if (dataIndex < encryptedData.length) {
-        // Use encrypted data bytes as RGB values
-        data[i] = encryptedData.charCodeAt(dataIndex % encryptedData.length); // R
-        data[i + 1] = encryptedData.charCodeAt((dataIndex + 1) % encryptedData.length); // G
-        data[i + 2] = encryptedData.charCodeAt((dataIndex + 2) % encryptedData.length); // B
-        dataIndex += 3;
-      } else {
-        // Fill remaining pixels with pseudo-random values
-        data[i] = (i * 137) % 256; // R
-        data[i + 1] = (i * 211) % 256; // G
-        data[i + 2] = (i * 317) % 256; // B
-      }
-      data[i + 3] = 255; // Alpha (full opacity)
-    }
+    // Draw crossed eye icon in the center
+    const centerX = dimension / 2;
+    const centerY = dimension / 2 - 60; // Move up a bit to make room for text
+    const eyeRadius = 60;
 
-    // Put image data on canvas
-    ctx.putImageData(imageData, 0, 0);
+    // Draw outer eye shape
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.ellipse(centerX, centerY, eyeRadius * 1.5, eyeRadius, 0, 0, 2 * Math.PI);
+    ctx.stroke();
 
-    // Add custom text overlay if provided
+    // Draw inner circle (pupil)
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, eyeRadius * 0.6, 0, 2 * Math.PI);
+    ctx.stroke();
+
+    // Draw inner pupil
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, eyeRadius * 0.3, 0, 2 * Math.PI);
+    ctx.fill();
+
+    // Draw cross over the eye
+    ctx.strokeStyle = '#ff0000';
+    ctx.lineWidth = 6;
+
+    // Diagonal line from top-left to bottom-right
+    ctx.beginPath();
+    ctx.moveTo(centerX - eyeRadius * 1.2, centerY - eyeRadius * 0.8);
+    ctx.lineTo(centerX + eyeRadius * 1.2, centerY + eyeRadius * 0.8);
+    ctx.stroke();
+
+    // Diagonal line from top-right to bottom-left
+    ctx.beginPath();
+    ctx.moveTo(centerX + eyeRadius * 1.2, centerY - eyeRadius * 0.8);
+    ctx.lineTo(centerX - eyeRadius * 1.2, centerY + eyeRadius * 0.8);
+    ctx.stroke();
+
+    // Add main title text
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 28px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    const mainText = 'Gambar dienkripsi menggunakan';
+    const methodText = 'metode Triple DES';
+
+    // Draw main text in two lines
+    ctx.fillText(mainText, centerX, centerY + 120);
+    ctx.fillText(methodText, centerX, centerY + 155);
+
+    // Add custom message if provided
     if (customText.trim()) {
-      // Create semi-transparent overlay for better text visibility
-      const overlayCanvas = document.createElement('canvas');
-      const overlayCtx = overlayCanvas.getContext('2d');
-      overlayCanvas.width = dimension;
-      overlayCanvas.height = dimension;
+      // Add separator line
+      ctx.strokeStyle = '#555555';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(centerX - 200, centerY + 190);
+      ctx.lineTo(centerX + 200, centerY + 190);
+      ctx.stroke();
 
-      // Draw semi-transparent background
-      overlayCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-      overlayCtx.fillRect(0, 0, dimension, dimension);
+      // Setup custom text styling
+      ctx.fillStyle = '#cccccc';
+      ctx.font = 'italic 20px Arial, sans-serif';
 
-      // Setup text styling
-      const fontSize = Math.max(24, dimension / 15);
-      overlayCtx.font = `bold ${fontSize}px Arial, sans-serif`;
-      overlayCtx.fillStyle = '#ffffff';
-      overlayCtx.strokeStyle = '#000000';
-      overlayCtx.lineWidth = 2;
-      overlayCtx.textAlign = 'center';
-      overlayCtx.textBaseline = 'middle';
+      // Word wrap for long custom text
+      const maxWidth = 600;
+      const lineHeight = 30;
+      const words = customText.split(' ');
+      let line = '';
+      let y = centerY + 230;
 
-      // Draw text with stroke for better visibility
-      const centerX = dimension / 2;
-      const centerY = dimension / 2;
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        const testWidth = metrics.width;
 
-      overlayCtx.strokeText(customText, centerX, centerY);
-      overlayCtx.fillText(customText, centerX, centerY);
+        if (testWidth > maxWidth && n > 0) {
+          ctx.fillText(line.trim(), centerX, y);
+          line = words[n] + ' ';
+          y += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
 
-      // Blend overlay with scrambled image
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.drawImage(overlayCanvas, 0, 0);
+      // Draw the last line
+      if (line.trim()) {
+        ctx.fillText(line.trim(), centerX, y);
+      }
     }
+
+    // Add subtle pattern overlay for texture
+    ctx.globalAlpha = 0.1;
+    for (let i = 0; i < 100; i++) {
+      const x = Math.random() * dimension;
+      const y = Math.random() * dimension;
+      const size = Math.random() * 3 + 1;
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1.0;
 
     // Get scrambled image data URL for preview
     const scrambledDataUrl = canvas.toDataURL('image/jpeg', 0.9);

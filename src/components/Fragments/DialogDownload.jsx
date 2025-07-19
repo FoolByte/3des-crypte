@@ -66,7 +66,7 @@ export default function DialogDownload({ showDialog, setShowDialog, handleDownlo
           </DialogClose>
 
           <DialogClose asChild>
-            <BtnClear resetForm={resetForm} />
+            <BtnClear onClick={resetForm} />
           </DialogClose>
         </div>
       </DialogContent>

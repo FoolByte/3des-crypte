@@ -7,6 +7,11 @@ import { useState } from 'react';
 export default function EncryptKey({ keyValue, setKey, handleEncrypt, selectedFile, isEncrypting, error, setError, customText, setCustomText }) {
   const isPasswordValid = (password) => password.length >= 6;
   const [isNote, setIsNote] = useState(false);
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      handleEncrypt();
+    }
+  };
 
   return (
     <CardBase
@@ -28,6 +33,7 @@ export default function EncryptKey({ keyValue, setKey, handleEncrypt, selectedFi
           }}
           placeholder="Minimal 6 karakter"
           className="text-xs mb-3"
+          onKeyPress={handleKeyPress}
         />
 
         {isNote ? (
@@ -40,6 +46,7 @@ export default function EncryptKey({ keyValue, setKey, handleEncrypt, selectedFi
             maxLength={50}
             className="text-xs"
             autoFocus
+            onKeyPress={handleKeyPress}
           />
         ) : (
           <Button

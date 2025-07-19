@@ -20,7 +20,7 @@ export default function DialogDecrypt({ showDialog, setShowDialog, decryptedResu
         {decryptedResult && (
           <div className="space-y-4">
             <div className="flex flex-col items-center space-y-2">
-              <div className="border rounded-lg overflow-hidden bg-gray-50">
+              <div className="border rounded-lg overflow-hidden">
                 <img
                   src={decryptedResult.imageDataUrl}
                   alt="Decrypted Image"
@@ -48,7 +48,7 @@ export default function DialogDecrypt({ showDialog, setShowDialog, decryptedResu
           </DialogClose>
 
           <DialogClose asChild>
-            <BtnClear resetForm={resetForm} />
+            <BtnClear onClick={resetForm} />
           </DialogClose>
         </div>
       </DialogContent>

@@ -44,7 +44,7 @@ const Decrypt = () => {
 
     // Determine file extension - default to png since decrypted images are usually png
     const extension = 'png';
-    a.download = `${fileName}_decrypted.${extension}`;
+    a.download = `${fileName} [decrypted].${extension}`;
 
     document.body.appendChild(a);
     a.click();

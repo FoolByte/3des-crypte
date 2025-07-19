@@ -4,6 +4,12 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 export default function DecryptKey({ keyValue, setKey, handleDecrypt, selectedFile, isDecrypting, error }) {
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      handleDecrypt();
+    }
+  };
+
   return (
     <CardBase
       title="Password"
@@ -17,6 +23,7 @@ export default function DecryptKey({ keyValue, setKey, handleDecrypt, selectedFi
           className="text-xs"
           aria-label="Key Dekripsi"
           placeholder="key yang sama saat enkripsi"
+          onKeyPress={handleKeyPress}
         />
         {error && (
           <span className="text-yellow-500 dark:text-yellow-500 text-[11px] flex text-red mt-1">
