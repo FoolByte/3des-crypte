@@ -1,6 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { Download, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import BtnClear from '../Elements/Button/BtnClear';
 
 export default function DialogDecrypt({ showDialog, setShowDialog, decryptedResult, handleDownloadImage, resetForm }) {
   return (
@@ -35,6 +37,7 @@ export default function DialogDecrypt({ showDialog, setShowDialog, decryptedResu
               onClick={() => {
                 handleDownloadImage();
                 resetForm();
+                toast.success('Gambar diunduh!');
               }}
               variant="outline"
               className="flex items-center gap-2"
@@ -43,15 +46,9 @@ export default function DialogDecrypt({ showDialog, setShowDialog, decryptedResu
               Download Gambar Asli
             </Button>
           </DialogClose>
+
           <DialogClose asChild>
-            <Button
-              onClick={() => {
-                resetForm();
-              }}
-              className="flex-1"
-            >
-              clear
-            </Button>
+            <BtnClear resetForm={resetForm} />
           </DialogClose>
         </div>
       </DialogContent>

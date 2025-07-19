@@ -57,7 +57,7 @@ export default function ImageUploader({ onFileChange, resetTrigger, maxSize }) {
               >
                 <ImageIcon className="size-4 opacity-60" />
               </div>
-              <p className="text-sm font-medium">Unggah gambar Anda di sin</p>
+              <p className="text-sm font-medium">Unggah gambar Anda di sini</p>
               <Button
                 variant="outline"
                 className="mt-4"

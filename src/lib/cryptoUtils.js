@@ -1,5 +1,3 @@
-import CryptoJS from 'crypto-js';
-
 // Encrypt image file and create scrambled pixel image
 export const encryptImage = async (file, key, customText = '') => {
   const reader = new FileReader();
@@ -222,30 +220,6 @@ const createScrambledImage = (encryptedData, originalMimeType = 'image/jpeg', cu
       quality,
     );
   });
-};
-
-// Extract encrypted data from scrambled image
-const extractDataFromImage = (imageData) => {
-  try {
-    // Convert to string to search for markers
-    const imageString = new TextDecoder().decode(imageData);
-
-    // Find encrypted data between markers
-    const startMarker = '<<ENCRYPTED_DATA_START>>';
-    const endMarker = '<<ENCRYPTED_DATA_END>>';
-    const startIndex = imageString.indexOf(startMarker);
-    const endIndex = imageString.indexOf(endMarker);
-
-    if (startIndex === -1 || endIndex === -1) {
-      return null;
-    }
-
-    const encryptedData = imageString.substring(startIndex + startMarker.length, endIndex);
-    return encryptedData;
-  } catch (error) {
-    console.error('Error extracting data from image:', error);
-    return null;
-  }
 };
 
 // Get file extension from MIME type

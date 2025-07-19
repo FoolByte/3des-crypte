@@ -17,9 +17,6 @@ const Decrypt = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [resetUploader, setResetUploader] = useState(0);
 
-  const maxSizeMB = 5;
-  const maxSize = maxSizeMB * 1024 * 1024; // 5MB default
-
   const handleDecrypt = async () => {
     setIsDecrypting(true);
     setError('');
@@ -78,6 +75,20 @@ const Decrypt = () => {
         <TypoP>Pulihkan gambar terenkripsi dengan Triple DES</TypoP>
       </div>
 
+      {/* Image Upload */}
+      <CardBase
+        title={`Pilih Gambar Terenkripsi`}
+        description={`(JPG/PNG)`}
+      >
+        <ImageUploader
+          onFileChange={(file) => {
+            setSelectedFile(file);
+            setFileName(file ? file.name.replace(/\[.*?\]/g, '').split('.')[0] : '');
+          }}
+          resetTrigger={resetUploader}
+        />
+      </CardBase>
+
       {/* Input Password Dekripsi */}
       {selectedFile && (
         <DecryptKey
@@ -89,21 +100,6 @@ const Decrypt = () => {
           error={error}
         />
       )}
-
-      {/* Image Upload */}
-      <CardBase
-        title={`Pilih Gambar Terenkripsi`}
-        description={`(JPG/PNG, Max ${maxSizeMB} MB)`}
-      >
-        <ImageUploader
-          onFileChange={(file) => {
-            setSelectedFile(file);
-            setFileName(file ? file.name.replace(/\[.*?\]/g, '').split('.')[0] : '');
-          }}
-          resetTrigger={resetUploader}
-          maxSize={maxSize}
-        />
-      </CardBase>
 
       {/* Dialog box download decrypted image */}
       <DialogDecrypt

@@ -2,6 +2,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Download, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { toast } from 'sonner'; // tambahkan ini
+import BtnClear from '../Elements/Button/BtnClear';
 
 export default function DialogDownload({ showDialog, setShowDialog, handleDownload, resetForm, encryptedResult }) {
   const [showOriginal, setShowOriginal] = useState(false);
@@ -53,6 +55,7 @@ export default function DialogDownload({ showDialog, setShowDialog, handleDownlo
               onClick={() => {
                 handleDownload();
                 resetForm();
+                toast.success('Gambar diunduh!');
               }}
               variant="outline"
               className="flex items-center gap-2"
@@ -63,14 +66,7 @@ export default function DialogDownload({ showDialog, setShowDialog, handleDownlo
           </DialogClose>
 
           <DialogClose asChild>
-            <Button
-              onClick={() => {
-                resetForm();
-              }}
-              className="flex-1"
-            >
-              Clear
-            </Button>
+            <BtnClear resetForm={resetForm} />
           </DialogClose>
         </div>
       </DialogContent>

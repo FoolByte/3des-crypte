@@ -3,11 +3,13 @@ import { TextAnimate } from '@/components/magicui/text-animate';
 import Lottie from 'lottie-react';
 import imgAnimate from '@/assets/lottieimage.json';
 import { ThemeToggle } from './components/ThemeToggle';
+import { Toaster } from '@/components/ui/sonner';
 
 function App() {
   return (
     <main className="flex flex-col justify-between p-5 md:px-80 min-h-screen ">
       <div>
+        <Toaster />
         {/* Add theme toggle button */}
         <div className="flex justify-end mb-4">
           <ThemeToggle />

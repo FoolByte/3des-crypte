@@ -1,7 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import CardBase from './CardBase';
 import { Lock, Loader2, AlertCircle } from 'lucide-react';
 
 export default function DialogEncryptKey({ showPasswordDialog, setShowPasswordDialog, keyValue, setKey, handleEncrypt, selectedFile, isEncrypting, error, setError }) {

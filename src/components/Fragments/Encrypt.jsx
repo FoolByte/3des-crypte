@@ -18,9 +18,6 @@ const Encrypt = () => {
   const [resetUploader, setResetUploader] = useState(0);
   const [customText, setCustomText] = useState('');
 
-  const maxSizeMB = 5;
-  const maxSize = maxSizeMB * 1024 * 1024; // 2MB default
-
   const handleEncrypt = async () => {
     if (key.length < 6) {
       setError(`Key minimal 6 karakter. Anda perlu mengetikkan ${6 - key.length} karakter lagi.`);
@@ -85,6 +82,20 @@ const Encrypt = () => {
         <TypoP>Amankan gambar Anda dengan enkripsi Triple DES</TypoP>
       </div>
 
+      {/* Image Upload */}
+      <CardBase
+        title={`Pilih Gambar`}
+        description={`(JPG/PNG)`}
+      >
+        <ImageUploader
+          onFileChange={(file) => {
+            setSelectedFile(file);
+            setFileName(file ? file.name.replace(/\[.*?\]/g, '').split('.')[0] + ' [encrypted]' : '');
+          }}
+          resetTrigger={resetUploader}
+        />
+      </CardBase>
+
       {/* Input Password Enkripsi */}
       {selectedFile && (
         <EncryptKey
@@ -99,21 +110,6 @@ const Encrypt = () => {
           setCustomText={setCustomText}
         />
       )}
-
-      {/* Image Upload */}
-      <CardBase
-        title={`Pilih Gambar`}
-        description={`(JPG/PNG, Max ${maxSizeMB} MB)`}
-      >
-        <ImageUploader
-          onFileChange={(file) => {
-            setSelectedFile(file);
-            setFileName(file ? file.name.replace(/\[.*?\]/g, '').split('.')[0] + ' [encrypted]' : '');
-          }}
-          resetTrigger={resetUploader}
-          maxSize={maxSize} // Atur ukuran maksimum file
-        />
-      </CardBase>
 
       {/* Dialog box download file encrypted */}
       <DialogDownload
