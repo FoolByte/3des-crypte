@@ -2,7 +2,7 @@ import TabsApp from './components/Fragments/TabsApp';
 import { TextAnimate } from '@/components/magicui/text-animate';
 import Lottie from 'lottie-react';
 import imgAnimate from '@/assets/lottieimage.json';
-import { ThemeToggle } from './components/ThemeToggle';
+import { ThemeToggle } from '@/components/Elements/Switch/ThemeToggle';
 import { Toaster } from '@/components/ui/sonner';
 
 function App() {
