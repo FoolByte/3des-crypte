@@ -21,7 +21,7 @@ const BaseCryption = ({ type = 'encrypt' }) => {
   }, [selectedFile]);
 
   const getTitle = () => (isEncryption ? 'Enkripsi Gambar' : 'Dekripsi Gambar');
-  const getDescription = () => (isEncryption ? 'Amankan gambar Anda dengan enkripsi Triple DES' : 'Pulihkan gambar terenkripsi dengan Triple DES');
+  const getDescription = () => (isEncryption ? 'Amankan gambar Anda dengan Triple DES' : 'Pulihkan gambar terenkripsi dengan Triple DES');
 
   const getCardTitle = () => (isEncryption ? 'Pilih Gambar' : 'Pilih Gambar Terenkripsi');
 

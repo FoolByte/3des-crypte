@@ -1,8 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Encrypt from '../cryption/Encrypt';
 import Decrypt from '../cryption/Decrypt';
-// import Encrypt from './Encrypt';
-// import Decrypt from './Decrypt';
 
 export default function TabsApp() {
   return (

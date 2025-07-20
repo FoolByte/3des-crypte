@@ -1,0 +1,71 @@
+# Robots.txt for Enkripsi Dekripsi Gambar Website
+# Updated: 2025
+
+# Allow all search engines to crawl the site
+User-agent: *
+Allow: /
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
+
+# Block access to sensitive directories and files
+Disallow: /api/
+Disallow: /admin/
+Disallow: /.env
+Disallow: /config/
+Disallow: /logs/
+Disallow: /temp/
+Disallow: /cache/
+Disallow: /private/
+Disallow: /node_modules/
+Disallow: /.git/
+Disallow: /src/
+Disallow: /build/
+Disallow: /*.log$
+
+# Allow access to important assets
+Allow: /assets/
+Allow: /images/
+Allow: /css/
+Allow: /js/
+Allow: /fonts/
+Allow: *.css
+Allow: *.js
+Allow: *.png
+Allow: *.jpg
+Allow: *.jpeg
+Allow: *.gif
+Allow: *.svg
+Allow: *.webp
+Allow: *.ico
+
+# Block unwanted bots and crawlers
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: dotbot
+Disallow: /
+
+# Sitemap location
+Sitemap: https://yourwebsite.com/sitemap.xml
+Sitemap: https://yourwebsite.com/sitemap-pages.xml
+Sitemap: https://yourwebsite.com/sitemap-images.xml
+
+# Host directive (optional, for preferred domain)
+# Host: https://yourwebsite.com
